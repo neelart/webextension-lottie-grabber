@@ -3,102 +3,315 @@
 @import "../styles/variables";
 
 body {
-  color: $black;
-  background-color: $greyWhite;
   font-size: 11px;
   font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  color: $black;
+  background-color: $greyWhite;
 }
 
-.player { 
-  width: 100px;
-  height: 100px;
+.dark-theme {
+  color: $darkText;
+  background-color: $darkBackground;
+
+  h2 {
+    border-bottom: 1px solid $darkBorder !important;
+  }
+
+  .detail {
+    border-bottom: 1px dotted $darkBorder !important;
+
+    .detail-key {
+      color: $darkMutedText !important;
+    }
+
+    .detail-value {
+      color: $darkText !important;
+    }
+  }
+
+  .btn {
+    background: $darkButtonBackground !important;
+    color: $darkText !important;
+  }
+
+  .btn:hover {
+    background-color: lighten($darkButtonBackground, 10%) !important;
+  }
 }
-.animation { 
+
+.player, .animation {
   width: 100px;
   height: 100px;
 }
 
 #popup {
   min-width: 420px;
-  padding: 20px 20px;
+  padding: 15px; // Adjusted padding
+  position: relative; // For positioning settings/toggle buttons
+
+  .header-controls {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 10px; // Space between buttons
+
+    .icon-button {
+      background-color: $skyBlue; // Use a variable color
+      color: $greyWhite;
+      border: none;
+      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 3px;
+      font-size: 10px;
+      transition: background-color 0.3s;
+
+      &:hover {
+        background-color: darken($skyBlue, 10%);
+      }
+      // In a real scenario, you'd use SVGs or an icon font for actual icons
+    }
+  }
 
   h2 {
     font-size: 16px;
     border-bottom: 1px solid #333;
     padding-bottom: 5px;
-    margin-bottom: 20px;
+    margin-bottom: 15px; // Adjusted margin
   }
 
-  ul {
-    display: flex;
-    flex-direction: column;
-    margin-top: 1em;
-    justify-content: space-around;
+  .grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); // Responsive columns
+    grid-template-rows: repeat(6, auto); // 6 rows
+    grid-auto-flow: column; // Horizontal scroll
+    overflow-x: auto; // Enable horizontal scroll
+    gap: 15px; // Space between grid items
+    padding-bottom: 10px; // Space for scrollbar
+    min-height: calc(6 * (100px + 15px + 5px + 20px)); // item height + gap + details + actions (approx)
 
+    .download-selected-btn {
+      background-color: $darkAccent !important; // A distinct color for this primary action
+      color: white !important;
+      padding: 5px 10px !important;
+      margin-right: auto; // Pushes other header controls to the right
+      font-weight: $semibold;
+
+      &:hover {
+        background-color: darken($darkAccent, 10%) !important;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 16px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 5px;
+    margin-bottom: 15px; 
+  }
+
+  .grid-view, .list-view {
+    padding-left: 0; // Remove default ul padding
+    list-style-type: none; // Remove default list bullets
+  }
+  
+  .grid-view {
+    // ... (grid-view styles remain largely the same, li changes below) ...
     li {
       display: flex;
-      flex-direction: row;
-      margin-bottom: 20px;
+      flex-direction: column;
+      position: relative; 
+      background-color: #fff; // Add a card background
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px; // Padding for the card
 
-      div.preview {
-        width: 100px;
-        margin-right: 10px;
-        display: inline-flex;
+      &.selected-item {
+        border-color: $skyBlue;
+        box-shadow: 0 0 5px rgba($skyBlue, 0.5);
       }
 
-      div.details {
+      .selection-checkbox-container {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 10; // Above preview
+        input[type="checkbox"] {
+          cursor: pointer;
+        }
+      }
+
+      .thumbnail-container {
+        position: relative; 
+        margin-bottom: 8px; // Increased space
+        align-self: center; // Center preview container in grid item
+      }
+      
+      div.preview {
+        width: 100px;
+        height: 100px;
         display: inline-flex;
-        flex-direction: column;
-        margin-right: 10px;
-        width: 100%;
+        position: relative;
+        background-color: #e9e9e9;
+        border-radius: 3px;
+        overflow: hidden;
 
+        .player { width: 100%; height: 100%; }
+      }
+
+      .lottie-tag {
+        position: absolute;
+        top: 4px;
+        // Adjusted left instead of right for checkbox space, or make checkbox smaller
+        left: 28px; // Give space for checkbox if it's on the left of tag
+        background-color: rgba(0, 0, 0, 0.5); 
+        color: white; padding: 1px 4px; font-size: 8px; border-radius: 3px; opacity: 0.7;
+      }
+
+      .info-icon {
+        position: absolute; bottom: 4px; right: 4px; background-color: rgba(0, 0, 0, 0.6);
+        color: white; border: none; border-radius: 50%; width: 18px; height: 18px;
+        font-size: 10px; line-height: 18px; text-align: center; cursor: pointer; opacity: 0.7;
+        transition: opacity 0.2s;
+        &:hover { opacity: 1; }
+      }
+
+      .expanded-details {
+        background-color: #f9f9f9; padding: 8px; margin-top: 0;
+        border: 1px solid #eee; border-top: none; border-radius: 0 0 3px 3px; font-size: 10px;
         .detail {
-          display: flex;
-          flex-direction: row;
-          margin-bottom: 3px;
-          justify-content: space-between;
-          border-bottom: 1px dotted #ddd;
+          display: flex; justify-content: space-between; padding: 2px 0;
+          border-bottom: 1px dotted #ddd; &:last-child { border-bottom: none; }
+          .detail-key { color: #555; font-weight: $semibold; margin-right: 5px; }
+          .detail-value { color: #333; }
+        }
+      }
+      
+      div.actions {
+        display: flex; flex-direction: column; align-items: stretch; width: 100%;
+      }
+    }
+  }
 
-          .detail-key {
-            display: inline-flex;
-            color: #999;
-          }
+  .list-view {
+    // ... (list-view styles remain largely the same, li changes below) ...
+    li {
+      display: flex; flex-direction: row; align-items: flex-start; 
+      border-bottom: 1px solid #eee; padding: 10px 0; // Padding on li itself
+      position: relative;
+      background-color: #fff; // Card background for list items too
+      border-radius: 4px; // Rounded corners for list items
+      margin-bottom: 8px; // Space between list items
+      padding: 8px; // Padding for the card content
 
-          .detail-value {
-            display: inline-flex;
-            color: #666;
-          }
+      &:last-child { border-bottom: none; margin-bottom: 0; }
+
+      &.selected-item {
+        border-color: $skyBlue;
+        box-shadow: 0 0 5px rgba($skyBlue, 0.5);
+      }
+      
+      .selection-checkbox-container {
+        margin-right: 8px; // Space between checkbox and thumbnail
+        display: flex;
+        align-items: center; // Vertically align checkbox
+        padding-top: 40px; // Align with center of thumbnail roughly
+        input[type="checkbox"] {
+          cursor: pointer;
+        }
+      }
+
+      .thumbnail-container {
+        display: flex; flex-direction: column; margin-right: 10px; flex-shrink: 0;
+      }
+
+      div.preview {
+        width: 100px; height: 100px; position: relative;
+        background-color: #e9e9e9; border-radius: 3px; overflow: hidden;
+         .player { width: 100%; height: 100%;}
+      }
+
+      .lottie-tag {
+        position: absolute; top: 4px; right: 4px; background-color: rgba(0, 0, 0, 0.5);
+        color: white; padding: 1px 4px; font-size: 8px; border-radius: 3px; opacity: 0.7;
+      }
+
+      .info-icon {
+        position: absolute; bottom: 4px; right: 4px; background-color: rgba(0, 0, 0, 0.6);
+        color: white; border: none; border-radius: 50%; width: 18px; height: 18px;
+        font-size: 10px; line-height: 18px; text-align: center; cursor: pointer; opacity: 0.7;
+        &:hover { opacity: 1; }
+      }
+      
+      .expanded-details {
+        background-color: #f9f9f9; padding: 8px; border: 1px solid #eee; border-top: none;
+        border-radius: 0 0 3px 3px; font-size: 10px; width: 100px;
+        .detail {
+          display: flex; justify-content: space-between; padding: 2px 0;
+          border-bottom: 1px dotted #ddd; &:last-child { border-bottom: none; }
+          .detail-key { color: #555; font-weight: $semibold; }
+          .detail-value { color: #333; }
         }
       }
 
       div.actions {
-        display: inline-flex;
-        flex-direction: column;
-        align-items: right;
-        width: 120px;
+        display: flex; flex-direction: column; align-items: stretch;
+        width: 120px; flex-shrink: 0;
       }
+    }
+  }
+  
+  .dark-theme {
+    .grid-view li, .list-view li { // Card background for dark theme
+      background-color: lighten($darkBackground, 3%);
+      border-color: $darkBorder;
+      &.selected-item { // Selected item in dark theme
+         border-color: $darkAccent;
+         box-shadow: 0 0 5px rgba($darkAccent, 0.6);
+      }
+    }
 
-      .btn {
-        display: inline-flex;
-        border-radius: 3px;
-        font-size: 10px;
-        padding: 3px 4px;
-        background: #1ec7bb;
-        color: white;
-        cursor: pointer;
-        margin-bottom: 5px;
-        transition: .3s;
-        outline: none;
-      }
+    .grid-view li div.preview, .list-view li div.preview {
+      background-color: lighten($darkBackground, 7%);
+    }
 
-      .btn:hover {
-        background-color: rgba(37, 37, 56, 0.7);
-      }
+    .grid-view li .lottie-tag, .list-view li .lottie-tag {
+      background-color: rgba(255, 255, 255, 0.15); color: $darkText; opacity: 0.8;
+    }
 
-      .btn:active {
-        box-shadow: inset 0 3px 4px hsla(0, 0%, 0%, 0.2);
+    .grid-view li .info-icon, .list-view li .info-icon {
+      background-color: rgba(255, 255, 255, 0.25); color: $darkText;
+    }
+    
+    .grid-view li .expanded-details, .list-view li .expanded-details {
+      background-color: lighten($darkBackground, 5%); border-color: $darkBorder;
+      .detail {
+        border-bottom-color: $darkBorder;
+        .detail-key { color: $darkMutedText; }
+        .detail-value { color: $darkText; }
       }
-      
+    }
+    
+    .list-view li { border-bottom-color: $darkBorder; }
+  }
+  
+  .btn {
+    display: flex; 
+    justify-content: center; border-radius: 3px; font-size: 10px; padding: 5px 6px; // Slightly more padding
+    background: $skyBlue; // Changed default background
+    color: white;
+    cursor: pointer;
+    margin-bottom: 5px;
+    transition: .3s;
+    outline: none;
+    border: none; 
+
+    &:hover {
+      background-color: rgba(37, 37, 56, 0.7);
+    }
+
+    &:active {
+      box-shadow: inset 0 3px 4px hsla(0, 0%, 0%, 0.2);
     }
   }
 }

@@ -26,7 +26,7 @@ const extensionReloaderPlugin =
         // TODO: reload manifest on update
         contentScript: 'contentScript',
         background: 'background',
-        extensionPage: ['popup', 'options'],
+        extensionPage: ['popup', 'options', 'editor'],
       },
     })
     : () => {
@@ -63,6 +63,7 @@ module.exports = {
     contentScript: path.join(sourcePath, 'ContentScript', 'index.ts'),
     popup: path.join(sourcePath, 'Popup', 'index.tsx'),
     options: path.join(sourcePath, 'Options', 'index.tsx'),
+    editor: path.join(sourcePath, 'Editor', 'index.tsx'),
   },
 
   output: {
@@ -155,6 +156,12 @@ module.exports = {
       inject: 'body',
       chunks: ['options'],
       filename: 'options.html',
+    }),
+    new HtmlWebpackPlugin({
+      template: path.join(viewsPath, 'editor.html'),
+      inject: 'body',
+      chunks: ['editor'],
+      filename: 'editor.html',
     }),
     // write css file(s) to build folder
     new MiniCssExtractPlugin({ filename: 'css/[name].css' }),

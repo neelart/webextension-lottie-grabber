@@ -1,0 +1,246 @@
+// Import common variables if you have them (e.g., colors, fonts)
+// @import '../styles/variables';
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #f0f0f0;
+  color: #333;
+  font-size: 14px; // Base font size
+}
+
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.editor-header {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0; // Prevent header from shrinking
+
+  h1 {
+    margin: 0;
+    font-size: 1.4em; // Adjusted
+  }
+
+  .file-loader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    label { font-size: 0.9em; }
+    .file-name { font-size: 0.8em; opacity: 0.8; margin-left: 5px;}
+  }
+  
+  .download-json-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    margin-left: 15px; // Space from file loader
+    &:hover {
+      background-color: #0056b3;
+    }
+  }
+}
+
+.error-message, .notice { // Combined styling for error and notice messages
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid;
+}
+.error-message {
+  background-color: #ffdddd;
+  color: #d8000c;
+  border-bottom-color: #d8000c;
+}
+.notice { // For non-error messages like ".lottie editing not supported"
+  background-color: #eef6fc;
+  color: #00529b;
+  border-bottom-color: #b2d9ee;
+}
+
+
+.editor-main-content {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden; 
+}
+
+.lottie-player-panel {
+  flex-grow: 3; 
+  padding: 15px; // Adjusted padding
+  background-color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto; 
+
+  .player-placeholder {
+    color: #aaa;
+    font-size: 1.2em;
+    text-align: center;
+  }
+
+  // DotLottiePlayer container
+  > div[style*="width: 100%"], // Target the player's wrapper if it takes full width
+  .dotlottie-player-container { // Or if it has a specific class
+    max-width: 100%;
+    max-height: 100%;
+    width: auto !important;  // Let player size itself, or use Lottie's dimensions
+    height: auto !important; // Let player size itself
+    min-width: 200px; // Ensure a minimum size
+    min-height: 200px;
+    border: 1px dashed #ccc;
+    // The player component itself might set its own width/height based on Lottie data
+    // Overriding might be needed if it defaults too small/large
+  }
+}
+
+.editor-sidebar {
+  flex-grow: 1; 
+  background-color: #f7f7f7;
+  padding: 10px; // Adjusted padding
+  border-left: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; // Adjusted gap
+  overflow-y: auto; 
+
+  h2 {
+    margin-top: 0;
+    font-size: 1.2em;
+    color: #444; // Slightly darker
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 8px;
+  }
+
+  .layer-list {
+    .layer-item {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 8px 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background-color 0.2s;
+
+      &.hidden {
+        opacity: 0.6;
+        background-color: #f0f0f0;
+        .layer-name {
+          text-decoration: line-through;
+        }
+      }
+
+      .layer-name {
+        font-size: 0.9em;
+        flex-grow: 1;
+        margin-right: 10px;
+      }
+
+      .layer-controls {
+        display: flex;
+        gap: 5px;
+        button {
+          background: none;
+          border: 1px solid #ccc;
+          border-radius: 3px;
+          cursor: pointer;
+          padding: 3px 6px;
+          font-size: 0.9em;
+          &:hover { background-color: #e9e9e9; }
+        }
+      }
+      .shape-colors {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed #eee;
+        font-size: 0.85em;
+        .color-control {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          margin-bottom: 5px;
+          label { margin-right: 5px; }
+          input[type="color"] {
+            width: 30px; // Smaller color input
+            height: 20px;
+            padding: 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+          }
+        }
+      }
+    }
+    p { // For messages within layer list
+      font-size: 0.9em;
+      color: #666;
+      text-align: center;
+    }
+  }
+}
+
+// Dark Theme Adjustments
+body.dark-theme {
+    background-color: #222;
+    color: #eee;
+
+    .editor-header {
+        background-color: #1a1a1a;
+        .download-json-btn {
+            background-color: #0056b3;
+            &:hover { background-color: #004085; }
+        }
+    }
+    .error-message {
+        background-color: #5c2223; color: #ffacac; border-bottom-color: #8c3333;
+    }
+    .notice {
+        background-color: #1f3a52; color: #a8d5ff; border-bottom-color: #385f82;
+    }
+    .lottie-player-panel {
+        background-color: #2a2a2a;
+        > div[style*="width: 100%"], .dotlottie-player-container { // Player border in dark
+            border-color: #444;
+        }
+        .player-placeholder { color: #666; }
+    }
+    .editor-sidebar {
+        background-color: #333;
+        border-left-color: #444;
+        h2 { color: #bbb; border-bottom-color: #555; }
+        .layer-list {
+            .layer-item {
+                background-color: #3f3f3f;
+                border-color: #555;
+                &.hidden {
+                    background-color: #303030;
+                    opacity: 0.5;
+                }
+                .layer-name { color: #ddd; }
+                .layer-controls button {
+                    border-color: #666;
+                    color: #ddd;
+                    &:hover { background-color: #555; }
+                }
+                .shape-colors {
+                  border-top-color: #555;
+                  .color-control label { color: #bbb; }
+                  input[type="color"] { border-color: #666; }
+                }
+            }
+            p { color: #888; }
+        }
+    }
+}
