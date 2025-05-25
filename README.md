@@ -126,6 +126,25 @@ After building, you will find the extension files in a distribution directory (c
 3. Click the "Load unpacked" button.
 4. Select the directory containing the built extension for Opera (e.g., `extension/opera`).
 
+**Troubleshooting Build Issues:**
+
+Some common issues you might encounter during the build process:
+
+-   **`node-sass` build failures (especially on Windows):**
+    The `node-sass` package sometimes requires C++ build tools to compile. If you see errors related to `node-sass` during `yarn install` or the build process:
+    -   Ensure you have Visual Studio Build Tools installed. You can download them from the [Visual Studio website](https://visualstudio.microsoft.com/visual-cpp-build-tools/).
+    -   During installation, select the "Desktop development with C++" workload. Make sure the Windows SDK is included.
+
+-   **Node.js Version Compatibility:**
+    -   This project is generally tested with Node.js LTS (Long-Term Support) versions. As of recent updates, Node.js >=18.0.0 is recommended or required (check `package.json` for the `engines` field if specified).
+    -   If you are using a very new or very old version of Node.js, you might encounter compatibility issues with dependencies.
+    -   Consider using a Node Version Manager (like [nvm](https://github.com/nvm-sh/nvm) for Linux/macOS or [nvm-windows](https://github.com/coreybutler/nvm-windows) for Windows) to easily switch between Node.js versions. For example, to install and use Node.js v18:
+        ```bash
+        nvm install 18
+        nvm use 18
+        ```
+    -   After switching Node.js versions (especially if you switch to a new major version), it's a good practice to delete your `node_modules` folder and `yarn.lock` file, then run `yarn install` again.
+
 ## License
 
 MIT © [Jawish Hameed](http://jawish.org)
