@@ -4,12 +4,22 @@ $greyWhite: #f3f3f3;
 $skyBlue: #8892b0;
 
 // Dark theme colors
-$darkBackground: #1a1a1a;
-$darkText: #e0e0e0;
-$darkAccent: #1ec7bb;
-$darkMutedText: #8892b0;
-$darkBorder: #333333;
-$darkButtonBackground: #2a2a2a;
+$darkBackground: #1a1a1a; // Original general dark background
+$darkText: #e0e0e0; // Original general dark text
+$darkAccent: #1ec7bb; // Original accent (e.g., for buttons)
+$darkMutedText: #8892b0; // Original muted text
+$darkBorder: #333333; // Original border color
+$darkButtonBackground: #2a2a2a; // Original button background
+
+// New Specific Dark Theme Colors for Popup
+$dark-main-bg: #020218;
+$dark-card-bg: #141022;
+$dark-info-label-text: #8a62ca;
+$dark-answer-text: #847AFF; // Same as accent-color-logo
+$dark-lottie-preview-bg: #020218; // Same as main background
+
+// Accent Color for Logo/Branding
+$accent-color-logo: #847AFF; // This is the same as $dark-answer-text
 
 // fonts
 $nunito: "Nunito", sans-serif;

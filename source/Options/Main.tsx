@@ -215,7 +215,12 @@ const Main: React.FC = () => {
         Save Settings
       </button>
       {saveStatus && <p className="save-status">{saveStatus}</p>}
-      {/* Removed the old static note as saveStatus provides feedback now */}
+      
+      <div className="about-section">
+        <h3>About LottiX Grabber</h3>
+        <p>Plugin designed & developed by Neel Litoriya.</p>
+        {/* You can add links or more info here if needed */}
+      </div>
     </div>
   );
 };

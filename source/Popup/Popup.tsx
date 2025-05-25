@@ -228,87 +228,100 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
           Settings
         </button>
       </div>
-      <h2>Discovered Lotties ({filteredLotties.length})</h2>
+      <h2 className="popup-title">LottiX Grabber</h2>
+      <p className="lottie-count-display">Found: {filteredLotties.length} animation(s)</p>
       <ul 
         className={viewMode === 'grid' ? 'grid-view' : 'list-view'}
         style={gridStyles}
       >
-        {filteredLotties.map((data, index) => {
-          const uniqueId = getItemId(data, index);
-          const isExpanded = expandedItemId === uniqueId;
-          const isSelected = selectedItems.includes(uniqueId);
-          const hasBeenDownloaded = downloadedItems[uniqueId];
-          const playerSizeStyle = {
-            width: `${defaultPreviewSize}px`,
-            height: `${defaultPreviewSize}px`,
-          };
+        {filteredLotties.length > 0 ? (
+          filteredLotties.map((data, index) => {
+            const uniqueId = getItemId(data, index);
+            const isExpanded = expandedItemId === uniqueId;
+            const isSelected = selectedItems.includes(uniqueId);
+            const hasBeenDownloaded = downloadedItems[uniqueId];
+            const playerSizeStyle = {
+              width: `${defaultPreviewSize}px`,
+              height: `${defaultPreviewSize}px`,
+            };
 
-          return (
-            <li 
-              key={uniqueId} 
-              onMouseLeave={() => handleMouseLeaveItem(uniqueId)}
-              className={`${isExpanded ? 'expanded-item' : ''} ${isSelected ? 'selected-item' : ''}`}
-            >
-              <div className="selection-checkbox-container">
-                <input 
-                  type="checkbox" 
-                  checked={isSelected} 
-                  onChange={(e: ChangeEvent<HTMLInputElement>) => handleSelectItem(uniqueId, e.target.checked)}
-                  aria-label={`Select ${data.fileName || 'Lottie animation'}`}
-                />
-              </div>
-              <div className="thumbnail-container">
-                <div className="preview" style={playerSizeStyle}>
-                  <DotLottiePlayer
-                    src={data.lottieUrl}
-                    background="transparent"
-                    className='player'
-                    loop
-                    autoplay={isAutoplayEnabled}
+            return (
+              <li 
+                key={uniqueId} 
+                onMouseLeave={() => handleMouseLeaveItem(uniqueId)}
+                className={`${isExpanded ? 'expanded-item' : ''} ${isSelected ? 'selected-item' : ''}`}
+              >
+                <div className="selection-checkbox-container">
+                  <input 
+                    type="checkbox" 
+                    checked={isSelected} 
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handleSelectItem(uniqueId, e.target.checked)}
+                    aria-label={`Select ${data.fileName || 'Lottie animation'}`}
                   />
-                  <div className="lottie-tag">{data.wasDotLottie ? '.lottie' : '.json'}</div>
-                  <button 
-                    className="info-icon" 
-                    onClick={() => handleInfoClick(uniqueId)}
-                    onMouseEnter={() => handleInfoInteraction(uniqueId, true)}
-                    aria-expanded={isExpanded}
-                    aria-controls={`details-${uniqueId}`}
-                  >
-                    (i)
-                  </button>
                 </div>
-                {isExpanded && (
-                  <div id={`details-${uniqueId}`} className="expanded-details" style={{width: `${defaultPreviewSize}px`}}>
-                    <div className="detail"><span className="detail-key">Ver:</span><span className="detail-value">{data.bmVersion}</span></div>
-                    <div className="detail"><span className="detail-key">Res:</span><span className="detail-value">{data.width}x{data.height}</span></div>
-                    <div className="detail"><span className="detail-key">FPS:</span><span className="detail-value">{Number(data.frameRate).toFixed(1)}</span></div>
-                    <div className="detail"><span className="detail-key">Frames:</span><span className="detail-value">{Math.ceil(data.numFrames)}</span></div>
-                    <div className="detail"><span className="detail-key">Layers:</span><span className="detail-value">{Math.ceil(data.numLayers)}</span></div>
+                <div className="thumbnail-container">
+                  <div className="preview" style={playerSizeStyle}>
+                    <DotLottiePlayer
+                      src={data.lottieUrl}
+                      background="transparent"
+                      className='player'
+                      loop
+                      autoplay={isAutoplayEnabled}
+                    />
+                    <div className="lottie-tag">{data.wasDotLottie ? '.lottie' : '.json'}</div>
+                    <button 
+                      className="info-icon" 
+                      onClick={() => handleInfoClick(uniqueId)}
+                      onMouseEnter={() => handleInfoInteraction(uniqueId, true)}
+                      aria-expanded={isExpanded}
+                      aria-controls={`details-${uniqueId}`}
+                    >
+                      (i)
+                    </button>
                   </div>
-                )}
-              </div>
-              <div className="actions" style={ viewMode === 'grid' ? {width: `${defaultPreviewSize}px`} : {} }> 
-                <button
-                  className={`btn download-btn ${hasBeenDownloaded ? 'downloaded' : ''}`}
-                  onClick={() => handleDownload(data)}
-                  disabled={hasBeenDownloaded}
-                >
-                  {hasBeenDownloaded ? 'Downloaded ✓' : 'Download'}
-                </button>
-                <button className="btn" onClick={() => openWebPage(data.lottieUrl)}>Open URL</button>
-                {isEditorButtonEnabled && (
-                  <button 
-                    className="btn" 
-                    onClick={() => browser.tabs.create({ url: browser.runtime.getURL(`editor.html?lottieUrl=${encodeURIComponent(data.lottieUrl)}`) })}
+                  {isExpanded && (
+                    <div id={`details-${uniqueId}`} className="expanded-details" style={{width: `${defaultPreviewSize}px`}}>
+                      <div className="detail"><span className="detail-key">Ver:</span><span className="detail-value">{data.bmVersion}</span></div>
+                      <div className="detail"><span className="detail-key">Res:</span><span className="detail-value">{data.width}x{data.height}</span></div>
+                      <div className="detail"><span className="detail-key">FPS:</span><span className="detail-value">{Number(data.frameRate).toFixed(1)}</span></div>
+                      <div className="detail"><span className="detail-key">Frames:</span><span className="detail-value">{Math.ceil(data.numFrames)}</span></div>
+                      <div className="detail"><span className="detail-key">Layers:</span><span className="detail-value">{Math.ceil(data.numLayers)}</span></div>
+                    </div>
+                  )}
+                </div>
+                <div className="actions" style={ viewMode === 'grid' ? {width: `${defaultPreviewSize}px`} : {} }> 
+                  <button
+                    className={`btn download-btn ${hasBeenDownloaded ? 'downloaded' : ''}`}
+                    onClick={() => handleDownload(data)}
+                    disabled={hasBeenDownloaded}
+                    title={hasBeenDownloaded ? 'Downloaded' : 'Download Lottie'}
                   >
-                    Edit
+                    {hasBeenDownloaded ? '✅' : '📥'}
                   </button>
-                )}
-              </div>
-            </li>
-          )
-        })}
+                  <button className="btn" onClick={() => openWebPage(data.lottieUrl)} title="Open Lottie URL in new tab">Open URL</button>
+                  {isEditorButtonEnabled && (
+                    <button 
+                      className="btn" 
+                      onClick={() => browser.tabs.create({ url: browser.runtime.getURL(`editor.html?lottieUrl=${encodeURIComponent(data.lottieUrl)}`) })}
+                      title="Edit Lottie (JSON only)"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
+              </li>
+            )
+          })
+        ) : (
+          <div className="empty-state-container">
+            <img 
+              src="https://img.artora.in/images/2023/05/08/banner_Lottixe41bcda494e78e02.png" 
+              alt="No Lottie animations found." 
+            />
+          </div>
+        )}
       </ul>
+      {/* The old <p className="no-lotties-found"> is now handled by the empty-state-container above */}
     </section>
   );
 };

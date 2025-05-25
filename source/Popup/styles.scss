@@ -10,36 +10,96 @@ body {
 }
 
 .dark-theme {
-  color: $darkText;
-  background-color: $darkBackground;
+  // Apply new specific dark theme colors
+  background-color: $dark-main-bg; // Main popup background
+  color: $darkText; // General text color from existing dark theme
 
-  h2 {
-    border-bottom: 1px solid $darkBorder !important;
+  // Header controls, title, etc. can inherit or use existing dark theme variables for now
+  // unless specific overrides are needed for them with the new palette.
+  .popup-title {
+    color: $accent-color-logo; 
+    border-bottom-color: $darkBorder; // Use existing $darkBorder or a new one if palette requires
+  }
+  .lottie-count-display {
+    color: $darkMutedText;
+  }
+  .no-lotties-found {
+    color: $darkMutedText;
   }
 
-  .detail {
-    border-bottom: 1px dotted $darkBorder !important;
+  // Card styling for both grid and list views
+  .grid-view li, .list-view li { 
+    background-color: $dark-card-bg; // New card background
+    border-color: lighten($dark-card-bg, 10%); // Border slightly lighter than card
 
-    .detail-key {
-      color: $darkMutedText !important;
+    &.selected-item { 
+       border-color: $darkAccent; // Existing accent for selection
+       box-shadow: 0 0 5px rgba($darkAccent, 0.6);
     }
+  }
 
-    .detail-value {
-      color: $darkText !important;
+  // Preview area background
+  .grid-view li div.preview, .list-view li div.preview {
+    background-color: $dark-lottie-preview-bg; // New preview background
+  }
+
+  // Lottie tag, info icon - can use existing dark theme variables or new ones if needed
+  .grid-view li .lottie-tag, .list-view li .lottie-tag {
+    background-color: rgba(255, 255, 255, 0.15); 
+    color: $darkText; 
+  }
+  .grid-view li .info-icon, .list-view li .info-icon {
+    background-color: rgba(255, 255, 255, 0.25); 
+    color: $darkText;
+  }
+  
+  // Expanded details section styling
+  .grid-view li .expanded-details, .list-view li .expanded-details {
+    background-color: lighten($dark-card-bg, 5%); // Slightly lighter than card for distinct section
+    border-color: lighten($dark-card-bg, 10%);
+    
+    .detail {
+      border-bottom-color: lighten($dark-card-bg, 15%);
+      .detail-key { 
+        color: $dark-info-label-text; // New info label text color
+      }
+      .detail-value { 
+        color: $dark-answer-text; // New answer text color (same as $accent-color-logo)
+      }
     }
   }
-
-  .btn {
-    background: $darkButtonBackground !important;
-    color: $darkText !important;
+  
+  .list-view li { 
+    border-bottom-color: lighten($dark-card-bg, 10%); 
   }
 
-  .btn:hover {
-    background-color: lighten($darkButtonBackground, 10%) !important;
+  // Buttons can use existing dark theme button styles
+  .btn { 
+    background: $darkButtonBackground;
+    color: $darkText;
+    &:hover {
+      background-color: lighten($darkButtonBackground, 10%);
+    }
+  }
+  .download-selected-btn { 
+      background-color: $darkAccent !important; 
+      color: $darkText !important; 
+      &:hover {
+        background-color: darken($darkAccent, 10%) !important;
+      }
+  }
+  .download-btn {
+    &.downloaded {
+      background-color: #2E7D32 !important; 
+      color: white !important; 
+       &:hover {
+        background-color: #1B5E20 !important;
+      }
+    }
   }
 }
 
-.player, .animation {
+.player, .animation { // This seems to be a default size, ensure it fits dynamic sizing
   width: 100px;
   height: 100px;
 }
@@ -73,11 +133,44 @@ body {
     }
   }
 
-  h2 {
-    font-size: 16px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 5px;
-    margin-bottom: 15px; // Adjusted margin
+  .popup-title { // Changed from h2 to .popup-title to be more specific
+    font-size: 18px; // Slightly larger
+    font-weight: $bold;
+    color: $accent-color-logo; // Apply accent color
+    text-align: center;
+    padding-bottom: 8px; // Adjusted padding
+    margin-bottom: 10px; // Adjusted margin
+    border-bottom: 1px solid #eee; // Lighter border
+  }
+
+  .lottie-count-display {
+    font-size: 11px;
+    text-align: center;
+    color: #777;
+    margin-bottom: 15px;
+  }
+
+  .no-lotties-found { // This class is no longer used, replaced by empty-state-container
+    text-align: center;
+    color: #888;
+    margin-top: 20px;
+    font-style: italic;
+  }
+  
+  .empty-state-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 20px; // More padding for empty state
+    text-align: center;
+    margin-top: 20px; // Space from header
+
+    img {
+      max-width: 80%; // Control image size, not too large
+      height: auto;
+      opacity: 0.7; // Slightly desaturate to blend
+    }
   }
 
   .grid-view {
@@ -262,17 +355,33 @@ body {
   }
   
   .dark-theme {
-    .grid-view li, .list-view li { // Card background for dark theme
-      background-color: lighten($darkBackground, 3%);
-      border-color: $darkBorder;
-      &.selected-item { // Selected item in dark theme
-         border-color: $darkAccent;
+    .popup-title {
+      color: $accent-color-logo; // Ensure accent color stands out in dark theme too
+      border-bottom-color: $darkBorder;
+    }
+    .lottie-count-display {
+      color: $darkMutedText;
+    }
+    .no-lotties-found { // This class is no longer used
+      color: $darkMutedText;
+    }
+    .empty-state-container {
+      img {
+        opacity: 0.5; // Darken image slightly for dark theme
+      }
+    }
+
+    .grid-view li, .list-view li { 
+      background-color: $dark-card-bg; // Use new card bg for consistency
+      border-color: lighten($dark-card-bg, 10%);
+      &.selected-item { 
+         border-color: $darkAccent; 
          box-shadow: 0 0 5px rgba($darkAccent, 0.6);
       }
     }
 
     .grid-view li div.preview, .list-view li div.preview {
-      background-color: lighten($darkBackground, 7%);
+      background-color: $dark-lottie-preview-bg; // Use new preview bg
     }
 
     .grid-view li .lottie-tag, .list-view li .lottie-tag {
@@ -284,15 +393,40 @@ body {
     }
     
     .grid-view li .expanded-details, .list-view li .expanded-details {
-      background-color: lighten($darkBackground, 5%); border-color: $darkBorder;
+      background-color: lighten($dark-card-bg, 5%); 
+      border-color: lighten($dark-card-bg, 10%);
       .detail {
-        border-bottom-color: $darkBorder;
-        .detail-key { color: $darkMutedText; }
-        .detail-value { color: $darkText; }
+        border-bottom-color: lighten($dark-card-bg, 15%);
+        .detail-key { color: $dark-info-label-text; }
+        .detail-value { color: $dark-answer-text; }
       }
     }
     
-    .list-view li { border-bottom-color: $darkBorder; }
+    .list-view li { border-bottom-color: lighten($dark-card-bg, 10%); }
+
+    .btn { 
+      background: $darkButtonBackground;
+      color: $darkText;
+      &:hover {
+        background-color: lighten($darkButtonBackground, 10%);
+      }
+    }
+    .download-selected-btn { 
+        background-color: $darkAccent !important; 
+        color: $darkText !important; 
+        &:hover {
+          background-color: darken($darkAccent, 10%) !important;
+        }
+    }
+    .download-btn {
+      &.downloaded {
+        background-color: #2E7D32 !important; 
+        color: white !important; 
+         &:hover {
+          background-color: #1B5E20 !important;
+        }
+      }
+    }
   }
   
   .btn {

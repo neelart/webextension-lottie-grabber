@@ -27,9 +27,19 @@ const Editor: React.FC = () => {
   const [isDotLottieFile, setIsDotLottieFile] = useState<boolean>(false);
   const [fileName, setFileName] = useState<string>('');
   const [error, setError] = useState<string>('');
-  const [playerKey, setPlayerKey] = useState<number>(Date.now()); // To force player re-render
+  const [playerKey, setPlayerKey] = useState<number>(Date.now());
 
-  // Placeholder for URL loading (not part of this subtask's core)
+  // Effect for cleaning up Object URLs
+  useEffect(() => {
+    // This function will be called when the component unmounts
+    return () => {
+      if (playerSrc && typeof playerSrc === 'string' && playerSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(playerSrc);
+      }
+    };
+  }, [playerSrc]); // Rerun if playerSrc changes, to handle new blob URLs correctly if needed, though primary cleanup is on unmount.
+
+  // Placeholder for URL loading
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const lottieUrl = params.get('lottieUrl');
@@ -60,6 +70,11 @@ const Editor: React.FC = () => {
   }, []);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+    // Revoke previous object URL if one exists and playerSrc is a string (blob URL)
+    if (playerSrc && typeof playerSrc === 'string' && playerSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(playerSrc);
+    }
+
     const file = event.target.files?.[0];
     if (!file) {
       setError('No file selected.');
@@ -71,7 +86,8 @@ const Editor: React.FC = () => {
     }
 
     setFileName(file.name);
-    setError('');
+    setError(''); // Clear previous errors
+    setEditableLottieJson(null); // Reset editable JSON on new file load
     setIsDotLottieFile(file.name.endsWith('.lottie'));
 
     if (file.name.endsWith('.json')) {
