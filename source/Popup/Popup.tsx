@@ -37,8 +37,9 @@ interface PopupProps {
 const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
-  const [useClickToExpand, setUseClickToExpand] = useState<boolean>(false);
+  // expandedItemId and useClickToExpand are no longer needed for card expansion via info icon
+  // const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
+  // const [useClickToExpand, setUseClickToExpand] = useState<boolean>(false); 
   
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [downloadedItems, setDownloadedItems] = useState<{ [id: string]: boolean }>({});
@@ -46,9 +47,18 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
   // States for settings loaded from storage
   const [defaultPreviewSize, setDefaultPreviewSize] = useState<number>(100);
   const [filterPreviewMode, setFilterPreviewMode] = useState<string>('all'); // 'all', 'lottie', 'json'
-  const [isAutoplayEnabled, setIsAutoplayEnabled] = useState<boolean>(true);
+  const [isAutoplayEnabled, setIsAutoplayEnabled] = useState<boolean>(true); // For main player
   const [gridRowCount, setGridRowCount] = useState<number>(6);
   const [isEditorButtonEnabled, setIsEditorButtonEnabled] = useState<boolean>(true);
+
+  // Tooltip State
+  interface TooltipInfo {
+    x: number;
+    y: number;
+    lottieUrl: string;
+    name: string;
+  }
+  const [tooltipData, setTooltipData] = useState<TooltipInfo | null>(null);
 
   type DownloadSizeMode = 'original' | 'custom';
   interface DownloadSettings {
@@ -65,8 +75,7 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
           // Defaults from Options/Main.tsx defaultSettings
           theme: 'system',
           defaultLayout: 'grid',
-          expandOnClick: false,
-          // Settings to be integrated:
+          // expandOnClick: false, // No longer used for card expansion by info icon
           defaultLottieSize: 100,
           previewMode: 'all',
           autoplay: true,
@@ -74,26 +83,20 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
           enableBasicEditor: true, // Key used in Options
           // Download settings
           downloadSizeMode: 'original',
-          customDownloadWidth: 300, // Assuming this key is saved by Options
+          customDownloadWidth: 300, 
         });
 
-        // Theme
+        // Apply settings
         if (settings.theme === 'dark') setIsDarkTheme(true);
         else if (settings.theme === 'light') setIsDarkTheme(false);
         else setIsDarkTheme(window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false);
         
-        // Layout & Interaction
         setViewMode(settings.defaultLayout as ('grid' | 'list'));
-        setUseClickToExpand(settings.expandOnClick);
-        
-        // UI & Player Settings
         setDefaultPreviewSize(settings.defaultLottieSize);
         setFilterPreviewMode(settings.previewMode);
         setIsAutoplayEnabled(settings.autoplay);
         setGridRowCount(settings.gridRows);
         setIsEditorButtonEnabled(settings.enableBasicEditor);
-
-        // Download Settings
         setDownloadSettings({
           sizeMode: settings.downloadSizeMode as DownloadSizeMode,
           customWidth: settings.customDownloadWidth,
@@ -103,7 +106,22 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
         console.error("LottiX Grabber: Error loading popup settings", error);
       }
     };
+    
+    const initializeDownloadedState = () => {
+      if (foundLotties && foundLotties.length > 0) {
+        const initialDownloaded: { [id: string]: boolean } = {};
+        foundLotties.forEach((item, index) => {
+          const uniqueId = getItemId(item, index);
+          if (sessionStorage.getItem(uniqueId) === 'downloaded') {
+            initialDownloaded[uniqueId] = true;
+          }
+        });
+        setDownloadedItems(initialDownloaded);
+      }
+    };
+
     loadPopupSettings();
+    initializeDownloadedState(); // Initialize after settings and when foundLotties is available
 
     // System theme change listener
     const mediaQuery = window.matchMedia?.('(prefers-color-scheme: dark)');
@@ -125,15 +143,33 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
   const toggleViewMode = () => setViewMode(prev => (prev === 'grid' ? 'list' : 'grid'));
   const openOptionsPage = () => browser.runtime.openOptionsPage();
 
-  const handleInfoInteraction = (id: string, isEnter: boolean) => {
-    if (!useClickToExpand) setExpandedItemId(isEnter ? id : null);
+  // Tooltip Handlers for the new Info Icon Button
+  const handleInfoIconMouseEnter = (event: React.MouseEvent<HTMLButtonElement>, lottieItem: LottieItemData) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    // Position tooltip above the icon, centered. Adjust as needed.
+    // These are relative to viewport. Tooltip needs to be fixed or use portal.
+    // For simplicity, let's try to position it within the popup boundaries.
+    // X: center of icon. Y: above icon.
+    
+    // Get popup's own bounding rect to calculate relative positions if tooltip is absolute to popup
+    const popupRect = (event.currentTarget.closest('#popup') as HTMLElement)?.getBoundingClientRect();
+    const popupX = popupRect ? popupRect.left : 0;
+    const popupY = popupRect ? popupRect.top : 0;
+
+    setTooltipData({
+      x: rect.left + rect.width / 2 - popupX, // Adjust X to be relative to popup
+      y: rect.top - popupY - 10,             // Adjust Y, 10px above the icon, relative to popup
+      lottieUrl: lottieItem.lottieUrl,
+      name: lottieItem.meta?.nm || lottieItem.fileName || 'Lottie Animation',
+    });
   };
-  const handleInfoClick = (id: string) => {
-    if (useClickToExpand) setExpandedItemId(prev => (prev === id ? null : id));
+
+  const handleInfoIconMouseLeave = () => {
+    setTooltipData(null);
   };
-  const handleMouseLeaveItem = (id: string) => {
-    if (!useClickToExpand && expandedItemId === id) setExpandedItemId(null);
-  };
+
+  // Card expansion logic (handleInfoInteraction, handleInfoClick, handleMouseLeaveItem) is removed
+  // as the info icon now triggers a tooltip, not card expansion.
 
   const handleSelectItem = (itemId: string, checked: boolean) => {
     setSelectedItems(prev => 
@@ -142,7 +178,7 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
   };
 
   const handleDownload = async (item: LottieItemData) => {
-    const uniqueId = item.lottieUrl || item.fileName;
+    const uniqueId = getItemId(item, 0); // Use consistent ID generation
     try {
       const response = await fetch(item.lottieUrl);
       if (!response.ok) throw new Error(`Failed to fetch: ${response.statusText}`);
@@ -156,7 +192,7 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
         const originalWidth = jsonData.w;
         const originalHeight = jsonData.h;
         
-        if (originalWidth && originalHeight) { // Ensure w & h exist
+        if (originalWidth && originalHeight) { 
             const aspectRatio = originalHeight / originalWidth;
             jsonData.w = downloadSettings.customWidth;
             jsonData.h = Math.round(downloadSettings.customWidth * aspectRatio);
@@ -181,8 +217,11 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
+      // Persist to sessionStorage and update state
+      sessionStorage.setItem(uniqueId, 'downloaded');
       setDownloadedItems(prev => ({ ...prev, [uniqueId]: true }));
-      setTimeout(() => setDownloadedItems(prev => ({ ...prev, [uniqueId]: false })), 3000);
+      // The setTimeout to reset the visual cue is removed for session persistence.
+      // If temporary feedback is still desired on top of sticky, it needs different handling.
 
     } catch (error) {
       console.error(`LottiX Grabber: Error downloading ${item.lottieUrl}`, error);
@@ -191,7 +230,9 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
 
   const handleDownloadSelected = async () => {
     for (const itemId of selectedItems) {
-      const itemToDownload = foundLotties.find(l => getItemId(l, 0) === itemId); // Index 0 is arbitrary for getItemId here
+      // Ensure foundLotties is an array before calling find
+      const lottiesArray = Array.isArray(foundLotties) ? foundLotties : Object.values(foundLotties);
+      const itemToDownload = lottiesArray.find(l => getItemId(l, 0) === itemId);
       if (itemToDownload) {
         await handleDownload(itemToDownload); 
       }
@@ -199,12 +240,19 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
     setSelectedItems([]);
   };
   
-  const getItemId = (item: LottieItemData, index: number): string => item.lottieUrl || item.fileName || `lottie-${index}`;
+  const getItemId = (item: LottieItemData, index: number): string => {
+    // Ensure a consistent and unique ID. Using lottieUrl if available, otherwise fileName.
+    // Fallback to index should be rare if data is well-formed.
+    return item.lottieUrl || item.fileName || `lottie-item-${index}`;
+  };
 
-  const filteredLotties = foundLotties.filter(item => {
+  // Ensure foundLotties is treated as an array for filtering and mapping
+  const lottiesArray = Array.isArray(foundLotties) ? foundLotties : Object.values(foundLotties);
+  const filteredLotties = lottiesArray.filter(item => {
+    if (!item || typeof item.wasDotLottie === 'undefined') return false; // Basic check for valid item structure
     if (filterPreviewMode === 'lottie') return item.wasDotLottie;
     if (filterPreviewMode === 'json') return !item.wasDotLottie;
-    return true; // 'all'
+    return true;
   });
 
   const gridStyles = viewMode === 'grid' ? { gridTemplateRows: `repeat(${gridRowCount}, auto)` } : {};
@@ -237,7 +285,7 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
         {filteredLotties.length > 0 ? (
           filteredLotties.map((data, index) => {
             const uniqueId = getItemId(data, index);
-            const isExpanded = expandedItemId === uniqueId;
+            // isExpanded is no longer used for card expansion based on info icon
             const isSelected = selectedItems.includes(uniqueId);
             const hasBeenDownloaded = downloadedItems[uniqueId];
             const playerSizeStyle = {
@@ -246,10 +294,10 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
             };
 
             return (
+              // onMouseLeave for card-level item expansion removed
               <li 
                 key={uniqueId} 
-                onMouseLeave={() => handleMouseLeaveItem(uniqueId)}
-                className={`${isExpanded ? 'expanded-item' : ''} ${isSelected ? 'selected-item' : ''}`}
+                className={`${isSelected ? 'selected-item' : ''}`} // Removed isExpanded class
               >
                 <div className="selection-checkbox-container">
                   <input 
@@ -269,45 +317,43 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
                       autoplay={isAutoplayEnabled}
                     />
                     <div className="lottie-tag">{data.wasDotLottie ? '.lottie' : '.json'}</div>
-                    <button 
-                      className="info-icon" 
-                      onClick={() => handleInfoClick(uniqueId)}
-                      onMouseEnter={() => handleInfoInteraction(uniqueId, true)}
-                      aria-expanded={isExpanded}
-                      aria-controls={`details-${uniqueId}`}
-                    >
-                      (i)
-                    </button>
+                    {/* Old info icon on preview is removed */}
                   </div>
-                  {isExpanded && (
-                    <div id={`details-${uniqueId}`} className="expanded-details" style={{width: `${defaultPreviewSize}px`}}>
-                      <div className="detail"><span className="detail-key">Ver:</span><span className="detail-value">{data.bmVersion}</span></div>
-                      <div className="detail"><span className="detail-key">Res:</span><span className="detail-value">{data.width}x{data.height}</span></div>
-                      <div className="detail"><span className="detail-key">FPS:</span><span className="detail-value">{Number(data.frameRate).toFixed(1)}</span></div>
-                      <div className="detail"><span className="detail-key">Frames:</span><span className="detail-value">{Math.ceil(data.numFrames)}</span></div>
-                      <div className="detail"><span className="detail-key">Layers:</span><span className="detail-value">{Math.ceil(data.numLayers)}</span></div>
-                    </div>
-                  )}
+                  {/* Old expanded-details div is removed */}
                 </div>
-                <div className="actions" style={ viewMode === 'grid' ? {width: `${defaultPreviewSize}px`} : {} }> 
+              <div className="lottie-item-actions" style={ viewMode === 'grid' ? {width: `${defaultPreviewSize}px`} : {} }>
                   <button
-                    className={`btn download-btn ${hasBeenDownloaded ? 'downloaded' : ''}`}
-                    onClick={() => handleDownload(data)}
-                    disabled={hasBeenDownloaded}
-                    title={hasBeenDownloaded ? 'Downloaded' : 'Download Lottie'}
+                    className="icon-btn info-btn"
+                    title="View Info"
+                    onMouseEnter={(e) => handleInfoIconMouseEnter(e, data)}
+                    onMouseLeave={handleInfoIconMouseLeave}
                   >
-                    {hasBeenDownloaded ? '✅' : '📥'}
+                  ℹ️
                   </button>
-                  <button className="btn" onClick={() => openWebPage(data.lottieUrl)} title="Open Lottie URL in new tab">Open URL</button>
+                <button
+                  className="icon-btn copy-url-btn"
+                  title="Copy Lottie URL"
+                  onClick={() => copyClipboard(data.lottieUrl)}
+                >
+                  🔗
+                </button>
                   {isEditorButtonEnabled && (
-                    <button 
-                      className="btn" 
-                      onClick={() => browser.tabs.create({ url: browser.runtime.getURL(`editor.html?lottieUrl=${encodeURIComponent(data.lottieUrl)}`) })}
+                  <button
+                    className="icon-btn edit-btn"
                       title="Edit Lottie (JSON only)"
+                    onClick={() => browser.tabs.create({ url: browser.runtime.getURL(`editor.html?lottieUrl=${encodeURIComponent(data.lottieUrl)}`) })}
                     >
-                      Edit
+                    ✏️
                     </button>
                   )}
+                <button
+                  className={`icon-btn download-btn ${hasBeenDownloaded ? 'downloaded' : ''}`}
+                  title="Download Lottie"
+                  onClick={() => handleDownload(data)}
+                  disabled={hasBeenDownloaded}
+                >
+                  {hasBeenDownloaded ? '✅' : '📥'}
+                </button>
                 </div>
               </li>
             )
@@ -322,6 +368,25 @@ const Popup: React.FC<PopupProps> = ({ foundLotties }) => {
         )}
       </ul>
       {/* The old <p className="no-lotties-found"> is now handled by the empty-state-container above */}
+      
+      {tooltipData && (
+        <div 
+          className="info-tooltip" 
+          style={{ 
+            left: `${tooltipData.x}px`, 
+            top: `${tooltipData.y}px`,
+            // transform: 'translate(-50%, -100%)' // To center above and on top of icon
+          }}
+        >
+          <p className="tooltip-name">{tooltipData.name}</p>
+          <DotLottiePlayer 
+            src={tooltipData.lottieUrl} 
+            autoplay 
+            loop 
+            className="tooltip-player" // Use class for styling player
+          />
+        </div>
+      )}
     </section>
   );
 };

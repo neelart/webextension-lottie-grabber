@@ -29,18 +29,51 @@ const Editor: React.FC = () => {
   const [error, setError] = useState<string>('');
   const [playerKey, setPlayerKey] = useState<number>(Date.now());
 
+  // --- Phase 1: Initial Sanity Check (Hardcoded Data) ---
+  const [useHardcodedData, setUseHardcodedData] = useState(false); // Set to true to test
+  const hardcodedLottieJson = {
+    v: "5.5.2", fr: 30, ip: 0, op: 30, w: 100, h: 100, nm: "Hardcoded Test",
+    ddd: 0, assets: [], layers: [
+      { ty: 4, ddd: 0, ind: 1, ao: 0, ip: 0, op: 30, st: 0, nm: "Shape Layer 1",
+        shapes: [
+          { ty: "gr", it: [
+            { ty: "rc", d: 1, s: { a: 0, k: [50, 50] }, p: { a: 0, k: [0, 0] }, r: { a: 0, k: 0 } },
+            { ty: "fl", c: { a: 0, k: [0.8, 0.2, 0.2, 1] } } // Red fill
+          ], nm: "Rectangle" }
+        ]
+      }
+    ]
+  };
+
+  useEffect(() => {
+    if (useHardcodedData) {
+      console.log("TESTING: Using hardcoded Lottie data.");
+      setEditableLottieJson(hardcodedLottieJson);
+      setPlayerSrc(deepClone(hardcodedLottieJson));
+      setFileName("hardcoded_test.json");
+      setIsDotLottieFile(false);
+      setError('');
+      setPlayerKey(Date.now());
+    }
+    // Temporarily set an error to test visibility
+    // setError("TESTING: Error display check.");
+  }, [useHardcodedData]);
+  // --- End Phase 1 ---
+
   // Effect for cleaning up Object URLs
   useEffect(() => {
-    // This function will be called when the component unmounts
     return () => {
       if (playerSrc && typeof playerSrc === 'string' && playerSrc.startsWith('blob:')) {
+        console.log("CLEANUP: Revoking Object URL:", playerSrc);
         URL.revokeObjectURL(playerSrc);
       }
     };
-  }, [playerSrc]); // Rerun if playerSrc changes, to handle new blob URLs correctly if needed, though primary cleanup is on unmount.
+  }, [playerSrc]);
 
-  // Placeholder for URL loading
+  // URL loading
   useEffect(() => {
+    if (useHardcodedData) return; // Don't process URL if hardcoded data is active
+
     const params = new URLSearchParams(window.location.search);
     const lottieUrl = params.get('lottieUrl');
     if (lottieUrl) {
@@ -70,13 +103,16 @@ const Editor: React.FC = () => {
   }, []);
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // Revoke previous object URL if one exists and playerSrc is a string (blob URL)
+    console.log("--- handleFileChange triggered ---"); // Phase 2
+
     if (playerSrc && typeof playerSrc === 'string' && playerSrc.startsWith('blob:')) {
+      console.log("CLEANUP (handleFileChange): Revoking previous Object URL:", playerSrc);
       URL.revokeObjectURL(playerSrc);
     }
 
     const file = event.target.files?.[0];
     if (!file) {
+      console.log("No file selected.");
       setError('No file selected.');
       setPlayerSrc(null);
       setEditableLottieJson(null);
@@ -85,51 +121,88 @@ const Editor: React.FC = () => {
       return;
     }
 
+    console.log("File selected:", { // Phase 2
+      name: file.name,
+      type: file.type, // This might be empty/unreliable; extension check is better
+      size: file.size,
+    });
+
     setFileName(file.name);
-    setError(''); // Clear previous errors
-    setEditableLottieJson(null); // Reset editable JSON on new file load
+    setError(''); 
+    setEditableLottieJson(null); 
     setIsDotLottieFile(file.name.endsWith('.lottie'));
 
     if (file.name.endsWith('.json')) {
+      console.log("Processing JSON file..."); // Phase 3
       const reader = new FileReader();
       reader.onload = (e) => {
+        const textContent = e.target?.result as string;
+        console.log("JSON FileReader onload - raw text:", textContent?.substring(0, 100) + "..."); // Phase 3
         try {
-          const content = e.target?.result as string;
-          const parsedJson = JSON.parse(content);
+          console.log("Attempting JSON.parse..."); // Phase 3
+          const parsedJson = JSON.parse(textContent);
+          console.log("JSON parsed successfully. Version:", parsedJson?.v, "Layers:", parsedJson?.layers?.length); // Phase 3
+          
           setEditableLottieJson(parsedJson);
-          setPlayerSrc(deepClone(parsedJson)); // Use a fresh copy for the player
-          setPlayerKey(Date.now()); // Force re-render of player
+          const playerJsonCopy = deepClone(parsedJson);
+          setPlayerSrc(playerJsonCopy); 
+          setPlayerKey(Date.now());
+
+          console.log("State after JSON load:", { // Phase 5
+            playerSrc: playerJsonCopy, // Log the copy
+            editableLottieJson: parsedJson,
+            isDotLottieFile: false,
+            fileName: file.name,
+          });
+
         } catch (err) {
-          console.error('Error parsing JSON file:', err);
+          console.error('Error parsing JSON file:', err); // Phase 3
           setError('Error loading JSON. Make sure it is a valid Lottie JSON file.');
           setEditableLottieJson(null);
           setPlayerSrc(null);
         }
       };
-      reader.onerror = () => setError('Error reading file.');
+      reader.onerror = () => {
+        console.error("FileReader error for JSON.");
+        setError('Error reading file.');
+      };
       reader.readAsText(file);
     } else if (file.name.endsWith('.lottie')) {
+      console.log("Processing .lottie file..."); // Phase 4
       const fileUrl = URL.createObjectURL(file);
+      console.log(".lottie Object URL created:", fileUrl); // Phase 4
+      
       setPlayerSrc(fileUrl);
-      setEditableLottieJson(null); // Clear any existing editable JSON
-      setError('Editing .lottie files is not directly supported. Only playback is enabled. Modify original JSON if available.');
+      // editableLottieJson remains null as per logic
+      setError('Editing .lottie files is not directly supported. Playback only. Modify original JSON if available.');
       setPlayerKey(Date.now());
+
+      console.log("State after .lottie load:", { // Phase 5
+        playerSrc: fileUrl,
+        editableLottieJson: null,
+        isDotLottieFile: true,
+        fileName: file.name,
+      });
+
     } else {
+      console.log("Unsupported file type.");
       setError('Unsupported file type. Please upload .json or .lottie files.');
       setPlayerSrc(null);
-      setEditableLottieJson(null);
+      // editableLottieJson is already null
     }
   };
   
   const handlePlayerEvents = (event: PlayerEvents) => {
+    console.log("Player Event:", event, "File:", fileName);
     if (event === PlayerEvents.Error) {
-      setError(`Lottie player error. Source: ${fileName}`);
-    } else if (event === PlayerEvents.Ready) {
+      setError(`Lottie player error. Source: ${fileName || 'unknown'}. Is the file valid?`);
+    } else if (event === PlayerEvents.Ready && !error.startsWith("Editing .lottie files")) { 
+      // Clear non-.lottie related errors when player is ready
       setError(''); 
     }
   };
 
-  const getLayerTypeName = (type: number): string => {
+  const getLayerTypeName = (type: number): string => { // No changes needed here
     const types: { [key: number]: string } = {
       0: 'Composition', 1: 'Solid', 2: 'Image', 3: 'Null',
       4: 'Shape', 5: 'Text', 6: 'Audio', 13: 'Data',

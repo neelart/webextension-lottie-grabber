@@ -280,22 +280,19 @@ body {
         }
       }
       
-      div.actions {
-        display: flex; flex-direction: column; align-items: stretch; width: 100%;
-      }
+      // div.actions removed as per plan
     }
   }
 
   .list-view {
-    // ... (list-view styles remain largely the same, li changes below) ...
     li {
       display: flex; flex-direction: row; align-items: flex-start; 
-      border-bottom: 1px solid #eee; padding: 10px 0; // Padding on li itself
+      border-bottom: 1px solid #eee; padding: 10px 0; 
       position: relative;
-      background-color: #fff; // Card background for list items too
-      border-radius: 4px; // Rounded corners for list items
-      margin-bottom: 8px; // Space between list items
-      padding: 8px; // Padding for the card content
+      background-color: #fff; 
+      border-radius: 4px; 
+      margin-bottom: 8px; 
+      padding: 8px; 
 
       &:last-child { border-bottom: none; margin-bottom: 0; }
 
@@ -305,10 +302,10 @@ body {
       }
       
       .selection-checkbox-container {
-        margin-right: 8px; // Space between checkbox and thumbnail
+        margin-right: 8px; 
         display: flex;
-        align-items: center; // Vertically align checkbox
-        padding-top: 40px; // Align with center of thumbnail roughly
+        align-items: center; 
+        padding-top: 40px; 
         input[type="checkbox"] {
           cursor: pointer;
         }
@@ -329,7 +326,7 @@ body {
         color: white; padding: 1px 4px; font-size: 8px; border-radius: 3px; opacity: 0.7;
       }
 
-      .info-icon {
+      .info-icon { // This is the old info icon on the preview, distinct from new action buttons
         position: absolute; bottom: 4px; right: 4px; background-color: rgba(0, 0, 0, 0.6);
         color: white; border: none; border-radius: 50%; width: 18px; height: 18px;
         font-size: 10px; line-height: 18px; text-align: center; cursor: pointer; opacity: 0.7;
@@ -346,33 +343,61 @@ body {
           .detail-value { color: #333; }
         }
       }
+      // div.actions removed
+    }
+  }
 
-      div.actions {
-        display: flex; flex-direction: column; align-items: stretch;
-        width: 120px; flex-shrink: 0;
+  .lottie-item-actions {
+    display: flex;
+    justify-content: flex-end; // Align buttons to the right
+    gap: 5px; // Space between buttons
+    margin-top: 8px; // Space above the action buttons row
+    width: 100%; // Ensure it takes available width for alignment
+
+    .icon-btn {
+      width: 30px; 
+      height: 30px; 
+      padding: 0;
+      background-color: transparent;
+      border: 1px solid $accent-color-logo;
+      color: $accent-color-logo;
+      font-size: 16px; // Adjust for icon visibility
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px; // Slightly rounded corners
+      transition: background-color 0.2s, color 0.2s;
+
+      &:hover {
+        background-color: rgba($accent-color-logo, 0.1);
+      }
+      &.downloaded { // Specific state for download button
+        background-color: #28a745 !important; // Green for success
+        border-color: #28a745 !important;
+        color: white !important;
+        cursor: default;
+        &:hover {
+          background-color: #218838 !important;
+        }
+      }
+      &:disabled { // For downloaded state mainly
+         opacity: 0.7;
+         cursor: default;
       }
     }
   }
   
   .dark-theme {
     .popup-title {
-      color: $accent-color-logo; // Ensure accent color stands out in dark theme too
+      color: $accent-color-logo; 
       border-bottom-color: $darkBorder;
     }
-    .lottie-count-display {
-      color: $darkMutedText;
-    }
-    .no-lotties-found { // This class is no longer used
-      color: $darkMutedText;
-    }
-    .empty-state-container {
-      img {
-        opacity: 0.5; // Darken image slightly for dark theme
-      }
-    }
+    .lottie-count-display { color: $darkMutedText; }
+    .empty-state-container { img { opacity: 0.5; } }
 
     .grid-view li, .list-view li { 
-      background-color: $dark-card-bg; // Use new card bg for consistency
+      background-color: $dark-card-bg; 
       border-color: lighten($dark-card-bg, 10%);
       &.selected-item { 
          border-color: $darkAccent; 
@@ -381,14 +406,14 @@ body {
     }
 
     .grid-view li div.preview, .list-view li div.preview {
-      background-color: $dark-lottie-preview-bg; // Use new preview bg
+      background-color: $dark-lottie-preview-bg; 
     }
 
     .grid-view li .lottie-tag, .list-view li .lottie-tag {
       background-color: rgba(255, 255, 255, 0.15); color: $darkText; opacity: 0.8;
     }
 
-    .grid-view li .info-icon, .list-view li .info-icon {
+    .grid-view li .info-icon, .list-view li .info-icon { // Old info icon on preview
       background-color: rgba(255, 255, 255, 0.25); color: $darkText;
     }
     
@@ -404,48 +429,85 @@ body {
     
     .list-view li { border-bottom-color: lighten($dark-card-bg, 10%); }
 
-    .btn { 
-      background: $darkButtonBackground;
-      color: $darkText;
-      &:hover {
-        background-color: lighten($darkButtonBackground, 10%);
+    .lottie-item-actions .icon-btn {
+      border-color: $darkAccent; // Keep border as $darkAccent for visibility on dark card
+      color: $accent-color-logo;   // Change icon color to $accent-color-logo
+      &:hover { 
+        background-color: rgba($accent-color-logo, 0.15); // Hover uses $accent-color-logo
       }
+      &.downloaded {
+        background-color: #2E7D32 !important; 
+        border-color: #2E7D32 !important;
+        color: white !important; 
+         &:hover { background-color: #1B5E20 !important; }
+      }
+    }
+    .header-controls .icon-button { 
+        background: $darkButtonBackground; 
+        color: $darkText;
+        &:hover { background-color: lighten($darkButtonBackground, 10%); }
     }
     .download-selected-btn { 
         background-color: $darkAccent !important; 
         color: $darkText !important; 
-        &:hover {
-          background-color: darken($darkAccent, 10%) !important;
-        }
+        &:hover { background-color: darken($darkAccent, 10%) !important; }
     }
-    .download-btn {
-      &.downloaded {
-        background-color: #2E7D32 !important; 
-        color: white !important; 
-         &:hover {
-          background-color: #1B5E20 !important;
-        }
+    // Tooltip specific dark theme adjustments
+    .info-tooltip {
+      background-color: $dark-card-bg;
+      border-color: $darkAccent;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4); // Darker shadow for dark theme
+      .tooltip-name {
+        color: $accent-color-logo; // Use the accent color for the name
+      }
+      .tooltip-player {
+        border-color: $darkBorder; // Use existing dark border for player
       }
     }
   }
   
-  .btn {
-    display: flex; 
-    justify-content: center; border-radius: 3px; font-size: 10px; padding: 5px 6px; // Slightly more padding
-    background: $skyBlue; // Changed default background
-    color: white;
-    cursor: pointer;
-    margin-bottom: 5px;
-    transition: .3s;
-    outline: none;
-    border: none; 
+  // Tooltip Styling
+  .info-tooltip {
+    position: absolute; // Positioned relative to #popup or nearest positioned ancestor
+    background-color: $greyWhite; // Light theme background
+    color: $black; // Light theme text
+    padding: 12px;
+    border: 1px solid $accent-color-logo;
+    border-radius: 6px;
+    z-index: 1000; // High z-index
+    width: 250px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    pointer-events: none; // Prevent tooltip from interfering with mouse events on underlying items
+    transform: translate(-50%, -110%); // Default: center above and slightly offset from cursor/icon
+    // Transition for smooth appearance (optional)
+    // opacity: 0;
+    // visibility: hidden;
+    // transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
 
-    &:hover {
-      background-color: rgba(37, 37, 56, 0.7);
+    // &.visible {
+    //   opacity: 1;
+    //   visibility: visible;
+    // }
+
+    .tooltip-name {
+      font-size: 13px;
+      font-weight: $semibold;
+      color: $accent-color-logo;
+      margin-bottom: 8px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    &:active {
-      box-shadow: inset 0 3px 4px hsla(0, 0%, 0%, 0.2);
+    .tooltip-player {
+      width: 100%;
+      height: auto; // Let aspect ratio define height based on 100% width
+      min-height: 180px; // Ensure a decent minimum height for the player
+      display: block; // Ensure it takes full width
+      border: 1px solid #eee; // Light border for player itself
+      border-radius: 3px;
+      background-color: #f9f9f9; // Slightly different background for player area
     }
   }
 }
