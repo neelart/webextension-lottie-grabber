@@ -74,58 +74,57 @@ The `resources/` directory contains promotional and store listing assets:
 
 - [jawish/webextension-lottie-grabber](https://github.com/jawish/webextension-lottie-grabber) (Note: Link might need updating if repo name/URL changes)
 
-## Development
+## Build and Installation
 
-Ensure you have
+**Prerequisites:**
+- [Node.js](https://nodejs.org) (version 10 or later) installed.
+- [Yarn](https://yarnpkg.com) (v1 or v2) installed.
 
-- [Node.js](https://nodejs.org) 10 or later installed
-- [Yarn](https://yarnpkg.com) v1 or v2 installed
+**Build Steps:**
+1. Open your terminal and navigate to the root directory of the LottiX Grabber extension.
+2. Install dependencies:
+   ```bash
+   yarn install
+   ```
+3. Build the extension:
+   - For a specific browser (e.g., Chrome):
+     ```bash
+     yarn run build:chrome
+     ```
+   - To build for Firefox:
+     ```bash
+     yarn run build:firefox
+     ```
+   - To build for Opera:
+     ```bash
+     yarn run build:opera
+     ```
+   - Alternatively, to build for all supported browsers at once (output usually in `extension/` directory, specifically `extension/<browser_name>`):
+     ```bash
+     yarn run build
+     ```
+   (Note: The `dev` scripts like `yarn run dev:chrome`, `yarn run dev:firefox`, and `yarn run dev:opera` are for starting a development server with auto-reloading, useful during active development.)
 
-Then run the following:
+**Installation (Loading Unpacked Extension):**
 
-- `yarn install` to install dependencies.
-- `yarn run dev:chrome` to start the development server for chrome extension
-- `yarn run dev:firefox` to start the development server for firefox addon
-- `yarn run dev:opera` to start the development server for opera extension
-- `yarn run build:chrome` to build chrome extension
-- `yarn run build:firefox` to build firefox addon
-- `yarn run build:opera` to build opera extension
-- `yarn run build` builds and packs extensions all at once to extension/ directory
+After building, you will find the extension files in a distribution directory (commonly `extension/<browser_name>`, e.g., `extension/chrome`).
 
-### Steps
+**Google Chrome:**
+1. Open Chrome and navigate to `chrome://extensions`.
+2. Enable "Developer mode" (toggle switch, usually in the top-right corner).
+3. Click the "Load unpacked" button.
+4. Select the directory containing the built extension for Chrome (e.g., `extension/chrome`).
 
-- `yarn install` to install dependencies.
-- To watch file changes in developement
+**Mozilla Firefox:**
+1. Open Firefox and navigate to `about:debugging#/runtime/this-firefox`.
+2. Click the "Load Temporary Add-on..." button.
+3. Navigate to the build directory for Firefox (e.g., `extension/firefox`) and select the `manifest.json` file.
 
-  - Chrome
-    - `yarn run dev:chrome`
-  - Firefox
-    - `yarn run dev:firefox`
-  - Opera
-    - `yarn run dev:opera`
-
-- **Load extension in browser**
-
-- ### Chrome
-
-  - Go to the browser address bar and type `chrome://extensions`
-  - Check the `Developer Mode` button to enable it.
-  - Click on the `Load Unpacked Extension…` button.
-  - Select your extension’s extracted directory.
-
-- ### Firefox
-
-  - Load the Add-on via `about:debugging` as temporary Add-on.
-  - Choose the `manifest.json` file in the extracted directory
-
-- ### Opera
-
-  - Load the extension via `opera:extensions`
-  - Check the `Developer Mode` and load as unpacked from extension’s extracted directory.
-
-### Production
-
-- `yarn run build` builds the extension for all the browsers to `extension/BROWSER` directory respectively.
+**Opera:**
+1. Open Opera and navigate to `opera://extensions`.
+2. Enable "Developer mode".
+3. Click the "Load unpacked" button.
+4. Select the directory containing the built extension for Opera (e.g., `extension/opera`).
 
 ## License
 
